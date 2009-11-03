@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="app_name">Growing Phone Pet</string>
+	<string name="settings_activity_label">Growing Phone Pet > Settings</string>
+
+	<string name="fun_menu_title">Fun</string>
+	<string name="food_menu_title">Food</string>
+	<string name="settings_menu_title">Settings</string>
+
+	<string name="food_message">You fed your pet.</string>
+	<string name="play_message">You play with your pet.</string>
+
+	<string name="choose_toy_dialog_title">Choose a toy:</string>
+	<string name="book_toy">Book</string>
+	<string name="controller_toy">Controller</string>
+	<string name="harmonica_toy">Harmonica</string>
+	<string name="weights_toy">Weights</string>
+</resources>
