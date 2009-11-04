@@ -2,51 +2,81 @@ package com.clickpopmedia.android.pet.model;
 
 /**
  * Pet that grows characteristics based on interaction.
- *
+ * 
  */
 public class Pet {
+
+	public enum Toy {
+		BOOK, HARMONICA, WEIGHTS, CONTROLLER,
+	}
+
+	private int education;
 	
-	public static final int BOOK_TOY_ID = 0;
-	public static final int HARMONICA_TOY_ID = 1;
-	public static final int WEIGHTS_TOY_ID = 2;
-	public static final int CONTROLLER_TOY_ID = 3;
+	private int strength;
 	
-	private int size = 1;
+	private int gamingExperience;
 	
-	private boolean isGamer = false;
-	
-	private boolean isPlaya = false;
-	
-	public void feed() {
+	private int musicAbility;
+
+	private int size;
+
+	private Toy lastToy;
+
+	public Response feed() {
 		size++;
+		return education > 0 ? new PoliteEating() : new NoisyEating();
 	}
-	
-	public void playWith(int toyId) {
-		switch( toyId ) {
-			case BOOK_TOY_ID :
-			case CONTROLLER_TOY_ID :
-				isGamer = true;
-				isPlaya = false;
-			break;
-	
-			case WEIGHTS_TOY_ID :
-			case HARMONICA_TOY_ID :
-				isGamer = false;
-				isPlaya = true;			
-			break;
+
+	/**
+	 * Play with the pet using a toy.
+	 * 
+	 * @param toy Toy to use
+	 * @return true if the Pet accepted playing with the Toy
+	 */
+	public Response playWith(final Toy toy) {
+
+		if (toy == lastToy) {
+			return new Tantrum();
 		}
+
+		lastToy = toy;
+
+		switch (toy) {
+			case BOOK:
+				education++;
+				break;
+
+			case CONTROLLER:
+				gamingExperience++;
+				break;
+
+			case WEIGHTS:
+				strength++;
+				break;
+				
+			case HARMONICA:
+				musicAbility++;
+				break;
+		}
+
+		return new Playing();
 	}
-	
+
+	/**
+	 * Get the current size of the Pet.
+	 * 
+	 * @return size 0 or higher
+	 */
 	public int getSize() {
 		return size;
 	}
-	
+
 	public boolean isPlaya() {
-		return isPlaya;
+		return strength > 0 && strength >= gamingExperience;
 	}
-	
+
 	public boolean isGamer() {
-		return isGamer;
+		return gamingExperience > 0 && gamingExperience > strength;
 	}
 
 }

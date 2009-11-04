@@ -9,10 +9,20 @@
 
 	<string name="food_message">You fed your pet.</string>
 	<string name="play_message">You play with your pet.</string>
+	<string name="tantrum_message">Your pet makes a fuss. Maybe it is bored with that toy?</string>
 
 	<string name="choose_toy_dialog_title">Choose a toy:</string>
 	<string name="book_toy">Book</string>
 	<string name="controller_toy">Controller</string>
 	<string name="harmonica_toy">Harmonica</string>
 	<string name="weights_toy">Weights</string>
+	
+	<!-- Settings -->
+	<string name="settings_play_sound_title">Make Sound</string>
+	<string name="settings_play_sound_summary">Sometimes the best pet is a quiet pet.</string>
+	<string name="settings_vibrate_title">Vibrate</string>
+	<string name="settings_vibrate_summary">Those tantrums are a bit much, aren't they?</string>
+	<string name="settings_keep_awake_title">Keep Awake</string>	
+	<string name="settings_keep_awake_summary">Good for starting contests with your pet.</string>		
+	
 </resources>

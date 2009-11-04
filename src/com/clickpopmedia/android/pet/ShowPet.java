@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
@@ -15,9 +16,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
 
+import com.clickpopmedia.android.pet.media.Effects;
 import com.clickpopmedia.android.pet.model.Pet;
+import com.clickpopmedia.android.pet.model.Pet.Toy;
 import com.clickpopmedia.android.pet.view.PetView;
 
 /**
@@ -37,19 +39,32 @@ public class ShowPet extends Activity {
     
     private WakeLock mWakeLock;
     
+    private Effects mEffects;
+    
 	private PetView mPetView;
 
-	private Pet mPet = new Pet();
+	private Pet mPet;
 
 	/** Called when the activity is first created. */
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
 		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 		
+		setVolumeControlStream(AudioManager.STREAM_MUSIC);
+		
+		Object savedPet = getLastNonConfigurationInstance();
+		if ( null != savedPet && savedPet instanceof Pet ) {
+			mPet = (Pet) savedPet;
+		} else {
+			mPet = new Pet();
+		}
+		
     	PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
     	mWakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, WAKE_LOCK_TAG);
+    	
+    	mEffects = new Effects();
 		
 		setContentView(R.layout.main);
 		mPetView = (PetView) findViewById(R.id.petView);
@@ -62,10 +77,12 @@ public class ShowPet extends Activity {
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         
-        boolean stayAwake = settings.getBoolean("stayAwake", true);
-        if ( stayAwake ) {
+        boolean keepAwake = settings.getBoolean("keepAwake", true);
+        if ( keepAwake ) {
         	mWakeLock.acquire();    	
         }
+        
+        mEffects.onActivityUpdated(getApplicationContext(), settings);
     }
     
     @Override
@@ -80,7 +97,7 @@ public class ShowPet extends Activity {
 
 	//TODO Make the menu look more like the graphic design in the doc directory.
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
+	public boolean onCreateOptionsMenu(final Menu menu) {
 		super.onCreateOptionsMenu(menu);
 
 		MenuInflater inflater = getMenuInflater();
@@ -89,7 +106,7 @@ public class ShowPet extends Activity {
 	}
 
     @Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+	public boolean onOptionsItemSelected(final MenuItem item) {
 
 		switch (item.getItemId()) {
 		case R.id.fun_menu:
@@ -97,10 +114,8 @@ public class ShowPet extends Activity {
 			return true;
 
 		case R.id.food_menu:
-			mPet.feed();
+			mPet.feed().run(mEffects);;
 			mPetView.showPet(mPet);
-			Toast.makeText(getApplicationContext(), R.string.food_message,
-				Toast.LENGTH_SHORT).show();
 			return true;
 
 		case R.id.settings_menu:
@@ -112,7 +127,7 @@ public class ShowPet extends Activity {
 	}
  
     @Override
-	protected Dialog onCreateDialog(int id) {
+	protected Dialog onCreateDialog(final int id) {
     			
     	switch ( id ) {
     		case CHOOSE_TOY_DIALOG_ID:
@@ -127,29 +142,27 @@ public class ShowPet extends Activity {
 		    		.setTitle(R.string.choose_toy_dialog_title)
 		    		.setItems(items, new DialogInterface.OnClickListener() {
 			    	    public void onClick(DialogInterface dialog, int item) {
-			    	    	final int toyId;
+			    	    	final Toy toy;
 			    	    	switch( item ) {
 			    	    		case 0:
-			    	    			toyId = Pet.BOOK_TOY_ID;
+			    	    			toy = Pet.Toy.BOOK;
 			    	    			break;
 			    	    		case 1:
-			    	    			toyId = Pet.HARMONICA_TOY_ID;
+			    	    			toy = Pet.Toy.HARMONICA;
 			    	    			break;   	    	
 			    	    		case 2:
-			    	    			toyId = Pet.WEIGHTS_TOY_ID;
+			    	    			toy = Pet.Toy.WEIGHTS;
 			    	    			break;
 			    	    		case 3:
-			    	    			toyId = Pet.CONTROLLER_TOY_ID;
+			    	    			toy = Pet.Toy.CONTROLLER;
 			    	    			break;
 			    	    		default:
 			    	    			if ( LOG ) Log.e(LOG_TAG, "Unhandled choice in toy choosing dialog. Ignoring.");
 			    	    			return;
 			    	    	}
 			    	    	
-			    			mPet.playWith(toyId);
+			    			mPet.playWith(toy).run(mEffects);
 			    			mPetView.showPet(mPet);
-			    			Toast.makeText(getApplicationContext(), R.string.play_message,
-			    				Toast.LENGTH_SHORT).show();
 			    			return;
 			    	    }
 		    		})
@@ -158,6 +171,19 @@ public class ShowPet extends Activity {
     	
     	return super.onCreateDialog(id);
 		
+	}
+
+	@Override
+	public Object onRetainNonConfigurationInstance() {
+		return mPet;
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		mEffects.release();
 	}	
 
+    
+    
 }

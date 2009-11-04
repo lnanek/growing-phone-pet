@@ -2,10 +2,22 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
 	<CheckBoxPreference
-		android:key="stayAwake"
-		android:title="Stay Awake"
+		android:key="playSound"
+		android:title="@string/settings_play_sound_title"
 		android:defaultValue="true"
-		android:summary="Prevent phone from sleeping. Good for staring contests with your pet." />
+		android:summary="@string/settings_play_sound_summary" />
+		
+	<CheckBoxPreference
+		android:key="vibrate"
+		android:title="@string/settings_vibrate_title"
+		android:defaultValue="true"
+		android:summary="@string/settings_vibrate_summary" />
+								
+	<CheckBoxPreference
+		android:key="keepAwake"
+		android:title="@string/settings_keep_awake_title"
+		android:defaultValue="true"
+		android:summary="@string/settings_keep_awake_summary" />
 			
 
 </PreferenceScreen>

@@ -29,6 +29,10 @@ public class PetView extends View {
 		
 		final int size = pet.getSize();
 		switch( size ) {
+			case 0:
+			setBackgroundDrawable(R.drawable.pet_size_0);
+			break;
+			
 			case 1:
 			setBackgroundDrawable(R.drawable.pet_size_1);
 			break;
@@ -37,15 +41,11 @@ public class PetView extends View {
 			setBackgroundDrawable(R.drawable.pet_size_2);
 			break;
 			
-			case 3:
-			setBackgroundDrawable(R.drawable.pet_size_3);
-			break;
-			
 			default:			
 			setBackgroundDrawable( 
-				pet.isGamer() ? R.drawable.pet_size_4_gamer
-					: pet.isPlaya() ? R.drawable.pet_size_4_playa
-						: R.drawable.pet_size_4 );
+				pet.isGamer() ? R.drawable.pet_size_3_gamer
+					: pet.isPlaya() ? R.drawable.pet_size_3_playa
+						: R.drawable.pet_size_3 );
 			break;
 			
 		}
