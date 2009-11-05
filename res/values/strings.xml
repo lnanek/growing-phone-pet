@@ -23,6 +23,13 @@
 	<string name="settings_vibrate_title">Vibrate</string>
 	<string name="settings_vibrate_summary">Those tantrums are a bit much, aren't they?</string>
 	<string name="settings_keep_awake_title">Keep Awake</string>	
-	<string name="settings_keep_awake_summary">Good for starting contests with your pet.</string>		
+	<string name="settings_keep_awake_summary">Good for starting contests with your pet.</string>
 	
+	<!-- Tab Indicators -->	
+	<string name="tab_indicator_fun">Fun</string>
+	<string name="tab_indicator_food">Food</string>
+	<string name="tab_indicator_settings">Settings</string>
+	<string name="tab_indicator_open">^</string>
+	<string name="tab_indicator_close">*</string>
+		
 </resources>

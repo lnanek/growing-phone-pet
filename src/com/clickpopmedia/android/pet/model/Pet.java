@@ -7,24 +7,53 @@ package com.clickpopmedia.android.pet.model;
 public class Pet {
 
 	public enum Toy {
-		BOOK, HARMONICA, WEIGHTS, CONTROLLER,
+		BOOK, INSTRUMENT, WEIGHTS, GAME_CONTROLLER,
+	}
+	
+	public enum Food {
+		MEAT, SWEETS, VEGETABLE,
 	}
 
-	private int education;
-	
-	private int strength;
-	
-	private int gamingExperience;
-	
-	private int musicAbility;
+	private int mSize;
 
-	private int size;
+	private Toy mLastToy;
 
-	private Toy lastToy;
+	//How many times the pet has played with each toy.
+	
+	private int mToyCountBook;
 
-	public Response feed() {
-		size++;
-		return education > 0 ? new PoliteEating() : new NoisyEating();
+	private int mToyCountInstrument;
+	
+	private int mToyCountWeights;
+	
+	private int mToyCountGameController;
+	
+	//How many times the pet has eaten each food.
+	
+	private int mFoodCountMeat;
+
+	private int mFoodCountSweets;
+	
+	private int mFoodCountVegetable;
+
+	public Response feed(final Food food) {
+		
+		switch ( food ) {
+			case MEAT:
+				mFoodCountMeat++;
+				break;
+
+			case SWEETS:
+				mFoodCountSweets++;
+				break;
+
+			case VEGETABLE:
+				mFoodCountVegetable++;
+				break;
+		}
+		
+		mSize++;
+		return mToyCountBook > 0 ? new PoliteEating() : new NoisyEating();
 	}
 
 	/**
@@ -35,27 +64,27 @@ public class Pet {
 	 */
 	public Response playWith(final Toy toy) {
 
-		if (toy == lastToy) {
+		if (toy == mLastToy) {
 			return new Tantrum();
 		}
 
-		lastToy = toy;
+		mLastToy = toy;
 
 		switch (toy) {
 			case BOOK:
-				education++;
+				mToyCountBook++;
 				break;
 
-			case CONTROLLER:
-				gamingExperience++;
+			case GAME_CONTROLLER:
+				mToyCountGameController++;
 				break;
 
 			case WEIGHTS:
-				strength++;
+				mToyCountWeights++;
 				break;
 				
-			case HARMONICA:
-				musicAbility++;
+			case INSTRUMENT:
+				mToyCountInstrument++;
 				break;
 		}
 
@@ -68,15 +97,15 @@ public class Pet {
 	 * @return size 0 or higher
 	 */
 	public int getSize() {
-		return size;
+		return mSize;
 	}
 
 	public boolean isPlaya() {
-		return strength > 0 && strength >= gamingExperience;
+		return mToyCountWeights > 0 && mToyCountWeights >= mToyCountGameController;
 	}
 
 	public boolean isGamer() {
-		return gamingExperience > 0 && gamingExperience > strength;
+		return mToyCountGameController > 0 && mToyCountGameController > mToyCountWeights;
 	}
 
 }

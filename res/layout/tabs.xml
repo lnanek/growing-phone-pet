@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+      
+ 	<LinearLayout 
+ 		android:id="@+id/funTabContent"
+		android:orientation="horizontal"
+		android:layout_width="fill_parent" 
+		android:layout_height="wrap_content"
+		android:padding="1dip"
+		android:background="#FFF"
+		>         
+		<ImageButton
+			android:id="@+id/funButtonBook"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:src="@drawable/fun_book" 
+			android:background="#00000000"
+			/>         
+		<ImageButton
+			android:id="@+id/funButtonWeights"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:src="@drawable/fun_weights" 
+			android:background="#00000000" 
+			/>         
+		<ImageButton
+			android:id="@+id/funButtonGameController"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:src="@drawable/fun_gamecontroller" 
+			android:background="#00000000" 
+			/>         
+		<ImageButton
+			android:id="@+id/funButtonInstrument"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:src="@drawable/fun_instrument" 
+			android:background="#00000000" 
+			/>
+	</LinearLayout>
+        
+ 	<LinearLayout 
+ 		android:id="@+id/foodTabContent"
+		android:orientation="horizontal"
+		android:layout_width="fill_parent" 
+		android:layout_height="wrap_content"
+		android:padding="1dip"
+		android:background="#FFF"
+		>         
+		<ImageButton
+			android:id="@+id/foodButtonMeat"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:src="@drawable/food_meat" 
+			android:background="#00000000"
+			/>         
+		<ImageButton
+			android:id="@+id/foodButtonSweets"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:src="@drawable/food_sweets" 
+			android:background="#00000000" 
+			/>         
+		<ImageButton
+			android:id="@+id/foodButtonVegetable"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:src="@drawable/food_vegetable" 
+			android:background="#00000000" 
+			/>
+	</LinearLayout>
+
+    <View android:id="@+id/emptyTabContent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+       />
+                
+</FrameLayout>
