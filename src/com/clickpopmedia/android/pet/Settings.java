@@ -7,11 +7,11 @@ import android.preference.PreferenceActivity;
  * Offer settings options.
  *
  */
-public class Preferences extends PreferenceActivity {
+public class Settings extends PreferenceActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		addPreferencesFromResource(R.xml.preferences);
+		addPreferencesFromResource(R.xml.settings);
 	}
 }

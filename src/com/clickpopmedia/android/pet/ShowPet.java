@@ -11,7 +11,9 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TabHost;
@@ -24,29 +26,23 @@ import com.clickpopmedia.android.pet.model.Pet.Toy;
 import com.clickpopmedia.android.pet.view.PetView;
 
 /**
- * Show the current pet and offer options to interact with it.
+ * Show pet and offer options to interact.
  * 
  */
 public class ShowPet extends TabActivity {
-	//TODO Persist the pet characteristics over multiple runs.
+	//TODO Persist pet over multiple runs. Maybe offer a reset option in the settings at the same time.
 
-	private static final String OPENCLOSE_TAB_TAG = "openclose_tab";
-
-	private static final String SETTINGS_TAB_TAG = "settings_tab";
-
-	private static final String FOOD_TAB_TAG = "food_tab";
-
-	private static final String FUN_TAB_TAG = "fun_tab";
-	
-	//private static final String HIDDEN_TAB_TAG = "hidden_tab";
-
+	//Constants for logging.
 	private static final String LOG_TAG = "ShowPet";
-	
 	private static final boolean LOG = true;
 	
-	private static final String WAKE_LOCK_TAG = ShowPet.class.getPackage().getName();
+	//Constants for referring to tabs on the screen.
+	private static final String EXPAND_COLLAPSE_TAB = "openclose_tab";
+	private static final String SETTINGS_TAB = "settings_tab";
+	private static final String FOOD_TAB = "food_tab";
+	private static final String FUN_TAB = "fun_tab";	
 	
-	//private static final int CHOOSE_TOY_DIALOG_ID = 1;
+	private static final String WAKE_LOCK_TAG = ShowPet.class.getPackage().getName();
 	
 	private WakeLock mWakeLock;
 	
@@ -56,16 +52,15 @@ public class ShowPet extends TabActivity {
 
 	private Pet mPet;
 	
-	private String mPreviousTabTag = OPENCLOSE_TAB_TAG;
+	private String mPreviousTabTag = EXPAND_COLLAPSE_TAB;
 	
-	private LevelListDrawable mOpenCloseDrawable;
+	private LevelListDrawable mTabOpenCloseIndicator;
 	
-	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+		PreferenceManager.setDefaultValues(this, R.xml.settings, false);
 		
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		
@@ -85,60 +80,45 @@ public class ShowPet extends TabActivity {
 		mPetView = (PetView) findViewById(R.id.petView);
 		mPetView.showPet(mPet);
 		
-		//Set up tabs. They are somewhat weird in that they can collapse down to just the indicators.
+		//Setup tabs. Special in that they can collapse down to just the indicators.
 		//TODO Consider implementing own tabs instead of hacking the built in stuff like this.
 		final TabHost tabHost = getTabHost();
 		final ViewGroup tabContentView = tabHost.getTabContentView();
 		LayoutInflater.from(this).inflate(R.layout.tabs, tabContentView, true);
 		
-		tabHost.addTab(tabHost.newTabSpec(FUN_TAB_TAG)
+		tabHost.addTab(tabHost.newTabSpec(FUN_TAB)
 			.setIndicator(getText(R.string.tab_indicator_fun))
 			.setContent(R.id.funTabContent));
-		tabHost.addTab(tabHost.newTabSpec(FOOD_TAB_TAG)
+		tabHost.addTab(tabHost.newTabSpec(FOOD_TAB)
 			.setIndicator(getText(R.string.tab_indicator_food))
 			.setContent(R.id.foodTabContent));
-		tabHost.addTab(tabHost.newTabSpec(SETTINGS_TAB_TAG)
+		tabHost.addTab(tabHost.newTabSpec(SETTINGS_TAB)
 			.setIndicator(getText(R.string.tab_indicator_settings))
-			//.setContent(R.id.emptyTabContent));		
-		    .setContent(new Intent(this, Preferences.class)));
-		
-		/*
-		tabHost.addTab(tabHost.newTabSpec(HIDDEN_TAB_TAG)
-			.setIndicator("")
-			.setContent(R.id.emptyTabContent));	
-		final int hiddenTabIndex = 3;
-		*/
-		/*
-		TabWidget tabWidget = (TabWidget) findViewById(android.R.id.tabs);
-		View hiddenTabIndicator = tabWidget.getChildAt(hiddenTabIndex);
-		hiddenTabIndicator.setVisibility(View.INVISIBLE);
-		*/
-				
-		mOpenCloseDrawable = (LevelListDrawable) getResources().getDrawable(R.drawable.open_close_level_list);
-		tabHost.addTab(tabHost.newTabSpec(OPENCLOSE_TAB_TAG)
-			.setIndicator("", mOpenCloseDrawable)
+			//TODO change style/theme on the settings to match the tabs. Currently black inside white tabs.
+		    .setContent(new Intent(this, Settings.class)));
+
+		//This last tab has no content and just uses the indicator as a collapse/expand control.
+		//TODO Try to change the appearance of this indicator more so users don't expect content?
+		mTabOpenCloseIndicator = (LevelListDrawable) getResources().getDrawable(R.drawable.open_close_level_list);
+		tabHost.addTab(tabHost.newTabSpec(EXPAND_COLLAPSE_TAB)
+			.setIndicator("", mTabOpenCloseIndicator)
 			.setContent(R.id.emptyTabContent));
 		
-		tabHost.setCurrentTabByTag(OPENCLOSE_TAB_TAG);
+		tabHost.setCurrentTabByTag(EXPAND_COLLAPSE_TAB);
 		final TabWidget tabWidget = (TabWidget) findViewById(android.R.id.tabs);
 		final View opencloseTabIndicator = tabWidget.getChildAt(3);
 				
+		//Toggle the tabs between expanded and collapsed when the control is clicked.
 		opencloseTabIndicator.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 			
 				if ( LOG ) Log.d(LOG_TAG, "OPENCLOSE TAG clicked.");
-
-				if ( View.VISIBLE == tabContentView.getVisibility() ) {
-					setTabsCollapsed(true);
-				} else {
-					setTabsCollapsed(false);
-					tabHost.setCurrentTabByTag(FUN_TAB_TAG);
-				}
+				toggleTabsCollapsed();
 			}
 		});
 
-
+		//Close tabs if the indicator we use as the open/close control is focused.
 		opencloseTabIndicator.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 			@Override
 			public void onFocusChange(View v, boolean hasFocus) {
@@ -157,12 +137,12 @@ public class ShowPet extends TabActivity {
 			public void onTabChanged(String tabId) {
 				
 				//Expand the tabs if the user picked one while they were collapsed.
-				if ( OPENCLOSE_TAB_TAG != tabId) {
+				if ( EXPAND_COLLAPSE_TAB != tabId) {
 					setTabsCollapsed(false);
 				}
 				
 				//Reload the settings if we left the settings tab.
-				if ( SETTINGS_TAB_TAG == mPreviousTabTag ) {
+				if ( SETTINGS_TAB == mPreviousTabTag ) {
 					loadSettings();
 				}
 				
@@ -170,6 +150,7 @@ public class ShowPet extends TabActivity {
 			}			
 		});
 		
+		//Setup buttons.
 		addFoodClickListener(R.id.foodButtonMeat, Food.MEAT);
 		addFoodClickListener(R.id.foodButtonSweets, Food.SWEETS);
 		addFoodClickListener(R.id.foodButtonVegetable, Food.VEGETABLE);
@@ -180,21 +161,49 @@ public class ShowPet extends TabActivity {
 		
 	}
 	
-	private void setTabsCollapsed(boolean collapsed) {
+	/**
+	 * Collapse tabs as per {@link #setTabsCollapsed(boolean)}
+	 * if they are currently open.
+	 * Otherwise close them via the same method.
+	 */
+	private void toggleTabsCollapsed() {
 		
 		TabHost tabHost = getTabHost();
 		View tabContent = tabHost.getTabContentView();
 		
-		if ( collapsed ) {
-			tabContent.setVisibility(View.GONE);
-			tabHost.setCurrentTabByTag(OPENCLOSE_TAB_TAG);
-			mOpenCloseDrawable.selectDrawable(0);
+		if ( View.VISIBLE != tabContent.getVisibility() ) {
+			setTabsCollapsed(false);
+			tabHost.setCurrentTabByTag(FUN_TAB);
 		} else {
-			tabContent.setVisibility(View.VISIBLE);
-			mOpenCloseDrawable.selectDrawable(1);
-		}		
+			setTabsCollapsed(true);
+		}
 	}
 	
+	/**
+	 * Collapse or expand the tabbed content area of the screen.
+	 * Collapsed tabs show only their indicators, not the current
+	 * tab content and take less room on the screen.
+	 * 
+	 * @param collapsed boolean true to collapse tabs, false to expand
+	 */
+	private void setTabsCollapsed(boolean collapsed) {
+		
+		TabHost tabHost = getTabHost();
+		View tabContent = tabHost.getTabContentView();
+				
+		if ( collapsed ) {
+			tabContent.setVisibility(View.GONE);
+			tabHost.setCurrentTabByTag(EXPAND_COLLAPSE_TAB);
+			mTabOpenCloseIndicator.selectDrawable(0);
+		} else {
+			tabContent.setVisibility(View.VISIBLE);
+			mTabOpenCloseIndicator.selectDrawable(1);
+		}		
+	}
+
+	/**
+	 * Add action for food buttons.
+	 */
 	private void addFoodClickListener(final int buttonId, final Food food) {
 		findViewById(buttonId).setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -206,6 +215,9 @@ public class ShowPet extends TabActivity {
 		});		
 	}
 
+	/**
+	 * Add action for toy buttons.
+	 */
 	private void addFunClickListener(final int buttonId, final Toy toy) {
 		findViewById(buttonId).setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -233,7 +245,7 @@ public class ShowPet extends TabActivity {
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 		
 		boolean keepAwake = settings.getBoolean("keepAwake", true);
-		if ( keepAwake ) {
+		if ( keepAwake && !mWakeLock.isHeld() ) {
 			mWakeLock.acquire();		
 		}
 		
@@ -252,88 +264,9 @@ public class ShowPet extends TabActivity {
 
 	}	 
 
-	/*
-	//TODO Make the menu look more like the graphic design in the doc directory.
-	@Override
-	public boolean onCreateOptionsMenu(final Menu menu) {
-		super.onCreateOptionsMenu(menu);
-
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.menu, menu);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(final MenuItem item) {
-
-		switch (item.getItemId()) {
-		case R.id.fun_menu:
-			showDialog(CHOOSE_TOY_DIALOG_ID);
-			return true;
-
-		case R.id.food_menu:
-			mPet.feed(Food.MEAT).run(mEffects);;
-			mPetView.showPet(mPet);
-			return true;
-
-		case R.id.settings_menu:
-			startActivity(new Intent(this, Preferences.class));
-			return true;
-		}
-
-		return super.onOptionsItemSelected(item);
-	}
- 
-	@Override
-	protected Dialog onCreateDialog(final int id) {
-				
-		switch ( id ) {
-			case CHOOSE_TOY_DIALOG_ID:
-				final CharSequence[] items = {
-					getString(R.string.book_toy),
-					getString(R.string.harmonica_toy),
-					getString(R.string.weights_toy),
-					getString(R.string.controller_toy),
-				};
-		
-				return new AlertDialog.Builder(this)
-					.setTitle(R.string.choose_toy_dialog_title)
-					.setItems(items, new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int item) {
-							final Toy toy;
-							switch( item ) {
-								case 0:
-									toy = Pet.Toy.BOOK;
-									break;
-								case 1:
-									toy = Pet.Toy.INSTRUMENT;
-									break;	 			
-								case 2:
-									toy = Pet.Toy.WEIGHTS;
-									break;
-								case 3:
-									toy = Pet.Toy.GAME_CONTROLLER;
-									break;
-								default:
-									if ( LOG ) Log.e(LOG_TAG, "Unhandled choice in toy choosing dialog. Ignoring.");
-									return;
-							}
-							
-							mPet.playWith(toy).run(mEffects);
-							mPetView.showPet(mPet);
-							return;
-						}
-					})
-					.create();
-		}
-		
-		return super.onCreateDialog(id);
-		
-	}
-	*/
-
 	@Override
 	public Object onRetainNonConfigurationInstance() {
+		//Preserve the model across configuration changes.
 		return mPet;
 	}
 
@@ -343,6 +276,28 @@ public class ShowPet extends TabActivity {
 		mEffects.release();
 	}	
 
-	
+	/**
+	 * Allow the menu and other keys to open and close the tabs.
+	 */
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+		toggleTabsCollapsed();
+		return true;	
+	}
+
+	//TODO More interesting touch behavior.
+	/**
+	 * Allow touching the screen to open and close the tabs.
+	 */
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		
+		if ( MotionEvent.ACTION_DOWN == event.getAction() ) {
+			toggleTabsCollapsed();
+			return true;	
+		}
+		
+		return super.onTouchEvent(event);
+	}	
 	
 }
