@@ -13,6 +13,10 @@ public class Pet {
 	public enum Food {
 		MEAT, SWEETS, VEGETABLE,
 	}
+	
+	public enum Scenery {
+		CAVERN, CITY, FOREST, HILLS, MOUNTAIN
+	}
 
 	private int mSize;
 
@@ -35,6 +39,8 @@ public class Pet {
 	private int mFoodCountSweets;
 	
 	private int mFoodCountVegetable;
+	
+	private Scenery mScenery = Scenery.FOREST;
 
 	public Response feed(final Food food) {
 		
@@ -90,6 +96,21 @@ public class Pet {
 
 		return new Playing();
 	}
+	
+	public void nextScene() {
+		Scenery[] sceneryValues = Scenery.values();
+		int nextSceneryIndex = ( mScenery.ordinal() + 1 ) % sceneryValues.length;
+		mScenery = sceneryValues[nextSceneryIndex];
+	}
+	
+	public void previousScene() {
+		Scenery[] sceneryValues = Scenery.values();
+		int previousSceneryIndex = mScenery.ordinal() - 1;
+		if ( -1 == previousSceneryIndex ) {
+			previousSceneryIndex = sceneryValues.length - 1;
+		}
+		mScenery = sceneryValues[previousSceneryIndex];
+	}	
 
 	/**
 	 * Get the current size of the Pet.
@@ -98,6 +119,10 @@ public class Pet {
 	 */
 	public int getSize() {
 		return mSize;
+	}
+	
+	public Scenery getScenery() {
+		return mScenery;
 	}
 
 	public boolean isPlaya() {

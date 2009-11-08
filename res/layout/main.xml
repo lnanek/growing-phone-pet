@@ -8,7 +8,26 @@
 	    android:layout_width="fill_parent"
 	    android:layout_height="fill_parent"
 	    android:id="@+id/petView"
-	    />
+	    >
+	    <ImageView
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    android:scaleType="fitXY"
+		    android:id="@+id/sceneryView"
+	    	/>
+	    <ImageView
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    android:scaleType="centerInside"
+		    android:id="@+id/characterColorView"
+	    	/>
+	    <ImageView
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    android:scaleType="centerInside"
+		    android:id="@+id/characterFeaturesView"
+	    	/>
+	</view>
 	
 	<LinearLayout 
 		android:orientation="vertical"

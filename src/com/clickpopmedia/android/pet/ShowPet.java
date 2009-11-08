@@ -1,5 +1,6 @@
 package com.clickpopmedia.android.pet;
 
+import static com.clickpopmedia.android.pet.Constants.*;
 import android.app.TabActivity;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +12,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -32,9 +34,7 @@ import com.clickpopmedia.android.pet.view.PetView;
 public class ShowPet extends TabActivity {
 	//TODO Persist pet over multiple runs. Maybe offer a reset option in the settings at the same time.
 
-	//Constants for logging.
-	private static final String LOG_TAG = "ShowPet";
-	private static final boolean LOG = true;
+	private static final String LOG_TAG = "GPP ShowPet";
 	
 	//Constants for referring to tabs on the screen.
 	private static final String EXPAND_COLLAPSE_TAB = "openclose_tab";
@@ -56,6 +56,8 @@ public class ShowPet extends TabActivity {
 	
 	private LevelListDrawable mTabOpenCloseIndicator;
 	
+    protected GestureDetector mGestureDetector;
+	
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -63,6 +65,8 @@ public class ShowPet extends TabActivity {
 		PreferenceManager.setDefaultValues(this, R.xml.settings, false);
 		
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
+		
+		mGestureDetector = new GestureDetector(this, new FlingDetector(this));
 		
 		final Object savedPet = getLastNonConfigurationInstance();
 		if ( null != savedPet && savedPet instanceof Pet ) {
@@ -287,17 +291,33 @@ public class ShowPet extends TabActivity {
 
 	//TODO More interesting touch behavior.
 	/**
-	 * Allow touching the screen to open and close the tabs.
+	 * Tapping the screen opens and closes the tabs.
+	 * Swiping changes the scenery.
 	 */
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		
-		if ( MotionEvent.ACTION_DOWN == event.getAction() ) {
+		//Check for a gesture.
+		if ( mGestureDetector.onTouchEvent(event) )
+			return true;	
+		
+		//Otherwise handle as a tap.
+		if ( MotionEvent.ACTION_UP == event.getAction() ) {
 			toggleTabsCollapsed();
 			return true;	
 		}
 		
 		return super.onTouchEvent(event);
+	}
+
+	public void onFlingLeft() {
+		mPet.previousScene();
+		mPetView.showPet(mPet);
 	}	
+	
+	public void onFlingRight() {
+		mPet.nextScene();
+		mPetView.showPet(mPet);
+	}
 	
 }
