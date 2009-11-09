@@ -1,5 +1,9 @@
 package com.clickpopmedia.android.pet.model;
 
+import java.util.Random;
+
+import android.graphics.Color;
+
 /**
  * Pet that grows characteristics based on interaction.
  * 
@@ -17,10 +21,21 @@ public class Pet {
 	public enum Scenery {
 		CAVERN, CITY, FOREST, HILLS, MOUNTAIN
 	}
+	
+	public static final int[] COLORS = new int[] {
+		Color.parseColor("#ffcd0122"),//Red.
+		Color.parseColor("#ff1fa7e2"),//Blue.
+		Color.parseColor("#ff04ac52"),//Green.
+		Color.parseColor("#fff84d0c"),//Orange.
+		Color.parseColor("#fffdf115"),//Yellow.
+	};
 
-	private int mSize;
-
-	private Toy mLastToy;
+	//Just randomly pick a color for now.
+	private int mColor = COLORS[new Random().nextInt(COLORS.length)];
+	
+	private Toy mRecentToy;
+	
+	private Food mRecentFood;
 
 	//How many times the pet has played with each toy.
 	
@@ -44,6 +59,9 @@ public class Pet {
 
 	public Response feed(final Food food) {
 		
+		mRecentFood = food;
+		mRecentToy = null;
+		
 		switch ( food ) {
 			case MEAT:
 				mFoodCountMeat++;
@@ -58,7 +76,6 @@ public class Pet {
 				break;
 		}
 		
-		mSize++;
 		return mToyCountBook > 0 ? new PoliteEating() : new NoisyEating();
 	}
 
@@ -70,11 +87,12 @@ public class Pet {
 	 */
 	public Response playWith(final Toy toy) {
 
-		if (toy == mLastToy) {
+		if (toy == mRecentToy) {
 			return new Tantrum();
 		}
 
-		mLastToy = toy;
+		mRecentFood = null;
+		mRecentToy = toy;
 
 		switch (toy) {
 			case BOOK:
@@ -118,11 +136,23 @@ public class Pet {
 	 * @return size 0 or higher
 	 */
 	public int getSize() {
-		return mSize;
+		return (mFoodCountMeat + mFoodCountSweets + mFoodCountVegetable) / 2;
 	}
 	
 	public Scenery getScenery() {
 		return mScenery;
+	}
+
+	public Toy getRecentToy() {
+		return mRecentToy;
+	}
+
+	public Food getRecentFood() {
+		return mRecentFood;
+	}
+
+	public int getColor() {
+		return mColor;
 	}
 
 	public boolean isPlaya() {
