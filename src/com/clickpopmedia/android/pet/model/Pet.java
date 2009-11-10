@@ -30,8 +30,7 @@ public class Pet {
 		Color.parseColor("#fffdf115"),//Yellow.
 	};
 
-	//Just randomly pick a color for now.
-	private int mColor = COLORS[new Random().nextInt(COLORS.length)];
+	private int mColorIndex;
 	
 	private Toy mRecentToy;
 	
@@ -56,6 +55,20 @@ public class Pet {
 	private int mFoodCountVegetable;
 	
 	private Scenery mScenery = Scenery.FOREST;
+	
+	public Pet() {
+		this(null);
+	}
+	
+	public Pet(Pet previous) {
+		if ( null == previous ) {
+			//Just randomly pick a color.
+			mColorIndex = new Random().nextInt(COLORS.length);
+		} else {
+			//Use next color to ensure user knows pet changed when getting a new one.
+			mColorIndex = ( previous.mColorIndex + 1 ) % COLORS.length;
+		}
+	}
 
 	public Response feed(final Food food) {
 		
@@ -152,7 +165,7 @@ public class Pet {
 	}
 
 	public int getColor() {
-		return mColor;
+		return COLORS[mColorIndex];
 	}
 
 	public boolean isPlaya() {

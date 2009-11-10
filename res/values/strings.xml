@@ -21,6 +21,7 @@
 	<string name="settings_play_sound_title">Make Sound</string>
 	<string name="settings_vibrate_title">Vibrate</string>
 	<string name="settings_keep_awake_title">Keep Phone Awake</string>	
+	<string name="settings_new_pet">New Pet</string>	
 	
 	<!-- Tab Indicators -->	
 	<string name="tab_indicator_fun">Fun</string>

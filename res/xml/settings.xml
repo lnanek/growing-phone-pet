@@ -19,5 +19,9 @@
 		android:defaultValue="true"
 		/>
 			
+	<Preference
+		android:title="@string/settings_new_pet"
+		android:key="newPet" 
+		/>
 
 </PreferenceScreen>

@@ -2,8 +2,10 @@ package com.clickpopmedia.android.pet;
 
 import static com.clickpopmedia.android.pet.Constants.*;
 import android.app.TabActivity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.drawable.LevelListDrawable;
 import android.media.AudioManager;
@@ -56,14 +58,23 @@ public class ShowPet extends TabActivity {
 	
 	private LevelListDrawable mTabOpenCloseIndicator;
 	
-    protected GestureDetector mGestureDetector;
+    private GestureDetector mGestureDetector;
+
+	private BroadcastReceiver mNewPetReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if ( LOG ) Log.d(LOG_TAG, "Received new pet intent.");
+			mPet = new Pet(mPet);
+			mPetView.showPet(mPet);
+			setTabsCollapsed(true);
+		}
+	};
 	
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		PreferenceManager.setDefaultValues(this, R.xml.settings, false);
-		
+		PreferenceManager.setDefaultValues(this, R.xml.settings, false);		
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		
 		mGestureDetector = new GestureDetector(this, new FlingDetector(this));
@@ -254,6 +265,24 @@ public class ShowPet extends TabActivity {
 		}
 		
 		mEffects.onActivityUpdated(getApplicationContext(), settings);
+	}	
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		
+		if ( LOG ) Log.d(LOG_TAG, "onResume()");
+		
+		registerReceiver(mNewPetReceiver , new IntentFilter(Settings.NEW_PET_ACTION));
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		
+		if ( LOG ) Log.d(LOG_TAG, "onPause()");
+		
+		unregisterReceiver(mNewPetReceiver);
 	}	
 	
 	@Override
