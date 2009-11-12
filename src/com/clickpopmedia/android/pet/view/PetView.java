@@ -1,9 +1,12 @@
 package com.clickpopmedia.android.pet.view;
 
+import static com.clickpopmedia.android.pet.Constants.*;
+
 import java.util.ArrayList;
 
 import android.content.Context;
 import android.graphics.PorterDuff.Mode;
+import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.util.AttributeSet;
@@ -23,10 +26,9 @@ public class PetView extends FrameLayout {
 	
 	private static final String LOG_TAG = "GPP PetView";
 	
-	private ImageView mCharacterColorView;
-	
-	private ImageView mCharacterFeaturesView;
-	
+	//Body needs separate view because LayerDrawable seems to ignore color filter on individual layers.
+	private ImageView mBodyView;
+	private ImageView mFeaturesView;
 	private ImageView mSceneryView;
 	
 	public PetView(Context context) {
@@ -45,10 +47,8 @@ public class PetView extends FrameLayout {
 	protected void onFinishInflate() {
 		super.onFinishInflate();
 
-		mCharacterColorView = (ImageView) findViewById(R.id.characterColorView);
-				
-		mCharacterFeaturesView = (ImageView) findViewById(R.id.characterFeaturesView);
-		
+		mBodyView = (ImageView) findViewById(R.id.bodyView);
+		mFeaturesView = (ImageView) findViewById(R.id.featuresView);		
 		mSceneryView = (ImageView) findViewById(R.id.sceneryView);
 	}
 
@@ -56,12 +56,36 @@ public class PetView extends FrameLayout {
 		drawables.add(getResources().getDrawable(drawableId));
 	}
 	
+	private void addAnimation(final ArrayList<Drawable> drawables, final int drawableId) {
+		
+		
+		final Drawable drawable = getResources().getDrawable(drawableId);
+		drawables.add(drawable);
+		
+		if ( drawable instanceof AnimationDrawable ) {
+			if ( LOG ) Log.d(LOG_TAG, "Starting animation.");
+
+			//XXX start doesn't always work unless we set it to be run later like this..
+			post(new Runnable() {
+
+				@Override
+				public void run() {
+					((AnimationDrawable) drawable).start();
+				}
+				
+			});
+		}
+	}
+	
 	public void showPet(final Pet pet) {
 
-		//Putting all layers in one LayerDrawable seemed to ignore color filters 
-		//on the drawables, so we use a separate view for the colored body.
-		mCharacterColorView.setColorFilter(pet.getColor(), Mode.SRC_ATOP);
+		//Clear out previous drawables and color settings.
+		mBodyView.setImageDrawable(null);
+		mBodyView.setColorFilter(pet.getColor(), Mode.SRC_ATOP);
+		mFeaturesView.setImageDrawable(null);
+		mSceneryView.setImageDrawable(null);
 
+		//Set new ones.
 		final ArrayList<Drawable> features = new ArrayList<Drawable>();
 		boolean showScenery = true;
 		switch( pet.getSize() ) {
@@ -70,14 +94,14 @@ public class PetView extends FrameLayout {
 				break;
 			
 			case 1:
-				mCharacterColorView.setImageResource(R.drawable.character_child);
+				mBodyView.setImageResource(R.drawable.character_child);
 				
 				//XXX Low quality placeholder with jaggies in the mouth area.
 				add(features, R.drawable.character_child_features);
 				break;
 			
 			case 2:
-				mCharacterColorView.setImageResource(R.drawable.character_teen);
+				mBodyView.setImageResource(R.drawable.character_teen);
 				
 				//XXX Low quality placeholder with jaggies in the mouth area.
 				add(features, R.drawable.character_teen_features);
@@ -86,19 +110,17 @@ public class PetView extends FrameLayout {
 			default:			
 
 				if ( pet.isGamer() ) {
-					mCharacterColorView.setImageDrawable(null);
 					
 					//XXX Black bars in landscape mode because character not separate from scenery.
 					add(features, R.drawable.pet_size_3_gamer);	
 					showScenery = false;
 				} else if ( pet.isPlaya() ) {
-					mCharacterColorView.setImageDrawable(null);
 
 					//XXX Black bars in landscape mode because character not separate from scenery.
 					add(features, R.drawable.pet_size_3_playa);						
 					showScenery = false;
 				} else {
-					mCharacterColorView.setImageResource(R.drawable.character_adult);
+					mBodyView.setImageResource(R.drawable.character_adult);
 					
 					//XXX Low quality placeholder with jaggies in the mouth area.
 					add(features, R.drawable.character_adult_features);					
@@ -106,7 +128,9 @@ public class PetView extends FrameLayout {
 				break;
 		}
 		
-		mCharacterFeaturesView.setImageDrawable(new LayerDrawable(features.toArray(new Drawable[] {})));
+		if ( 0 != features.size() ) {
+			mFeaturesView.setImageDrawable(new LayerDrawable(features.toArray(new Drawable[] {})));
+		}
 		
 		if ( showScenery ) {
 			switch( pet.getScenery() ) {
@@ -132,20 +156,17 @@ public class PetView extends FrameLayout {
 				
 				default:
 					Log.e(LOG_TAG, "Unknown scenery: " + pet.getScenery());
-				
 			}
-		} else {
-			mSceneryView.setImageDrawable(null);
 		}
 		
 	}
 
 	private void updateBabyDrawables(Pet pet, ArrayList<Drawable> features) {
 		
-		mCharacterColorView.setColorFilter(pet.getColor(), Mode.MULTIPLY);
+		mBodyView.setColorFilter(pet.getColor(), Mode.MULTIPLY);
 				
 		if ( null != pet.getRecentFood() ) {
-			mCharacterColorView.setImageResource(R.drawable.character_baby_eat01_body01);
+			mBodyView.setImageResource(R.drawable.character_baby_eat01_body01);
 			add(features, R.drawable.character_baby_eat01_face01);
 			return;
 		}
@@ -154,33 +175,34 @@ public class PetView extends FrameLayout {
 		if ( null != recentToy ) {
 			switch( recentToy ) {
 				case BOOK:
-					mCharacterColorView.setImageResource(R.drawable.character_baby_reading01_body01);
-					add(features, R.drawable.character_baby_reading01_item01);
+					mBodyView.setImageResource(R.drawable.character_baby_reading01_body01);
 					add(features, R.drawable.character_baby_reading01_face01);
+					add(features, R.drawable.character_baby_reading01_item01);
 					return;
 					
 				case INSTRUMENT:
-					mCharacterColorView.setImageResource(R.drawable.character_baby_music01_body01);
-					add(features, R.drawable.character_baby_music01_item01);
+					mBodyView.setImageResource(R.drawable.character_baby_music01_body01);
 					add(features, R.drawable.character_baby_music01_face01);
+					add(features, R.drawable.character_baby_music01_item01);
 					return;
 					
 				case WEIGHTS:
-					mCharacterColorView.setImageResource(R.drawable.character_baby_lifting01_body01);
-					add(features, R.drawable.character_baby_lifting01_item01);
+					mBodyView.setImageResource(R.drawable.character_baby_lifting01_body01);
 					add(features, R.drawable.character_baby_lifting01_face01);
+					add(features, R.drawable.character_baby_lifting01_item01);
 					return;
 					
 				case GAME_CONTROLLER:
-					mCharacterColorView.setImageResource(R.drawable.character_baby_gaming01_body01);
-					add(features, R.drawable.character_baby_gaming01_item01);
+					mBodyView.setImageResource(R.drawable.character_baby_gaming01_body01);
 					add(features, R.drawable.character_baby_gaming01_face01);
+					add(features, R.drawable.character_baby_gaming01_item01);
 					return;
 			}
 		}
 		
-		mCharacterColorView.setImageResource(R.drawable.character_baby_normal01_body01);
-		add(features, R.drawable.character_baby_normal01_face01);
+		mBodyView.setImageResource(R.drawable.character_baby_normal01_body01);
+		addAnimation(features, R.drawable.character_baby_normal_face_animation);
+
 	}
 	
 	/*

@@ -19,13 +19,13 @@
 		    android:layout_width="fill_parent"
 		    android:layout_height="fill_parent"
 		    android:scaleType="centerInside"
-		    android:id="@+id/characterColorView"
+		    android:id="@+id/bodyView"
 	    	/>
 	    <ImageView
 		    android:layout_width="fill_parent"
 		    android:layout_height="fill_parent"
 		    android:scaleType="centerInside"
-		    android:id="@+id/characterFeaturesView"
+		    android:id="@+id/featuresView"
 	    	/>
 	</view>
 	
