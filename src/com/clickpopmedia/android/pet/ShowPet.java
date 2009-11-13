@@ -314,6 +314,12 @@ public class ShowPet extends TabActivity {
 	 */
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
+		
+		if ( KeyEvent.KEYCODE_VOLUME_UP == keyCode
+			|| KeyEvent.KEYCODE_VOLUME_DOWN == keyCode ) {
+			return false;
+		}
+		
 		toggleTabsCollapsed();
 		return true;	
 	}

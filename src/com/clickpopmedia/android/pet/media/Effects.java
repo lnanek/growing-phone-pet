@@ -21,26 +21,32 @@ public class Effects {
 		3 * VIBE_PULSE_LENGTH, 2 * VIBE_PULSE_LENGTH, 3 * VIBE_PULSE_LENGTH, VIBE_PULSE_LENGTH, 
 		2 * VIBE_PULSE_LENGTH, VIBE_PULSE_LENGTH};
 	
-	protected SoundPool soundPool;
+	protected SoundPool mPool;
 	
-	protected int politeEatingSoundID;
-	protected int noisyEatingSoundID;
+	protected int mPoliteEatingSound;
+	protected int mNoisyEatingSound;
+	protected int mMusicBasicSound;
+	protected int mMusicNormalSound;
+	protected int mMusicSkilledSound;
 
-	protected Toast playToast;
-	protected Toast foodToast;
-	protected Toast tantrumToast;
+	protected Toast mLastToast;
 	
-	protected Context context;
+	protected Context mContext;
 	
-	protected Vibrator vibrator;
+	protected Vibrator mVibrator;
 	
 	public Effects() {
 	}	
 	
-	protected Toast makeToast(CharSequence message) {
-		Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
+	protected void showToast(int messageID) {
+		//Prevent large stacks of toast during frequent actions.
+		if ( null != mLastToast ) {
+			mLastToast.cancel();
+		}
+		
+		mLastToast = Toast.makeText(mContext, messageID, Toast.LENGTH_SHORT);
 		//toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
-		return toast;
+		mLastToast.show();
 	}
 	
 	/**
@@ -50,18 +56,17 @@ public class Effects {
 	 */
 	public void onActivityUpdated(Context context, SharedPreferences settings) {
 		
-		this.context = context;
-		
-		playToast = makeToast(context.getText(R.string.play_message));
-		foodToast = makeToast(context.getText(R.string.food_message));	
-		tantrumToast = makeToast(context.getText(R.string.tantrum_message));	
+		this.mContext = context;
 
 		boolean playSound = settings.getBoolean("playSound", true);
 		if ( playSound) {
-			if ( null == soundPool ) {
-				soundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
-				politeEatingSoundID = soundPool.load(context, R.raw.quick_crunch, 1);
-				noisyEatingSoundID = soundPool.load(context, R.raw.noisy_eating, 1);
+			if ( null == mPool ) {
+				mPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
+				mPoliteEatingSound = mPool.load(context, R.raw.quick_crunch, 1);
+				mNoisyEatingSound = mPool.load(context, R.raw.noisy_eating, 1);
+				mMusicBasicSound = mPool.load(context, R.raw.music_basic, 1);
+				mMusicNormalSound = mPool.load(context, R.raw.music_normal, 1);
+				mMusicSkilledSound = mPool.load(context, R.raw.music_skilled, 1);
 			}
 		} else {
 			release();
@@ -69,27 +74,27 @@ public class Effects {
 		
 		boolean vibrate = settings.getBoolean("vibrate", true);
 		if ( vibrate) {
-			if ( null == vibrator ) {
-				vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+			if ( null == mVibrator ) {
+				mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 			}
 		} else {
-			vibrator = null;
+			mVibrator = null;
 		}
 		
 	}
 	
 	public void release() {
-		if ( null != soundPool ) {
-			soundPool.release();
-			soundPool = null;
+		if ( null != mPool ) {
+			mPool.release();
+			mPool = null;
 		}
 	}	
 	
-	protected void play(Integer soundID, Toast message, long[] vibePattern) {
+	protected void play(Integer soundID, Integer messageID, long[] vibePattern) {
 
-		if ( null != soundPool && null != soundID ) {
+		if ( null != mPool && null != soundID ) {
 		    //Priority 0 so don't interrupt anything higher.
-			int streamID = soundPool.play(soundID, 1f, 1f, 0, 0, 1);
+			int streamID = mPool.play(soundID, 1f, 1f, 0, 0, 1);
 	
 			//Once playing, don't let low priority sounds interrupt us.
 			//if ( streamID > 0 ) {
@@ -97,30 +102,42 @@ public class Effects {
 			//}	    
 		}
 		
-		if ( null != message ) {
-			message.show();
+		if ( null != messageID ) {
+			showToast(messageID);
 		}
 		
-		if ( null != vibrator && null != vibePattern ) {
-			vibrator.vibrate(vibePattern, -1);
+		if ( null != mVibrator && null != vibePattern ) {
+			mVibrator.vibrate(vibePattern, -1);
 		}
 		
 	}
 	
 	public void noisyEat() {
-		play(noisyEatingSoundID, foodToast, null);
+		play(mNoisyEatingSound, R.string.food_message_noisy, null);
 	}
 	
 	public void politeEat() {
-		play(politeEatingSoundID, foodToast, null);
+		play(mPoliteEatingSound, R.string.food_message_polite, null);
 	}
 	
 	public void play() {
-		play(null, playToast, null);
+		play(null, R.string.play_message, null);
 	}
 	
 	public void tantrum() {
-		play(null, tantrumToast, TANTRUM_VIBE);
+		play(null, R.string.tantrum_message, TANTRUM_VIBE);
+	}
+	
+	public void msuicBasic() {
+		play(mMusicBasicSound, R.string.play_music_basic_message, null);
+	}
+	
+	public void msuicNormal() {
+		play(mMusicNormalSound, R.string.play_music_normal_message, null);
+	}
+	
+	public void msuicSkilled() {
+		play(mMusicSkilledSound, R.string.play_music_skilled_message, null);
 	}
 	
 }

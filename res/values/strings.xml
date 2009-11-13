@@ -7,9 +7,13 @@
 	<string name="food_menu_title">Food</string>
 	<string name="settings_menu_title">Settings</string>
 
-	<string name="food_message">You fed your pet.</string>
+	<string name="food_message_polite">Your pet politely downs his meal in one chomp.</string>
+	<string name="food_message_noisy">You pet makes a lip-smacking mess of eating his meal.</string>
 	<string name="play_message">You play with your pet.</string>
 	<string name="tantrum_message">Your pet makes a fuss. Maybe it is bored with that toy?</string>
+	<string name="play_music_basic_message">Your pet makes an attempt at music.</string>
+	<string name="play_music_normal_message">Your pet plays a little tune.</string>
+	<string name="play_music_skilled_message">Your pet skillfully plays a nice tune.</string>
 
 	<string name="choose_toy_dialog_title">Choose a toy:</string>
 	<string name="book_toy">Book</string>

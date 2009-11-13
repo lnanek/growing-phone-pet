@@ -125,7 +125,7 @@ public class Pet {
 				break;
 		}
 
-		return new Playing();
+		return new Playing(toy, mToyCountInstrument);
 	}
 	
 	public void nextScene() {
