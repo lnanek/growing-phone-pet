@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+ <animation-list xmlns:android="http://schemas.android.com/apk/res/android" 
+ 	android:oneshot="false"
+ 	>
+ 	
+    <item android:drawable="@drawable/character_baby_cry02_face01" android:duration="2000" />
+    <item android:drawable="@drawable/character_baby_cry01_face01" android:duration="200" />
+    <item android:drawable="@drawable/character_baby_cry02_face01" android:duration="6000" />
+    <item android:drawable="@drawable/character_baby_cry01_face01" android:duration="200" />
+
+ </animation-list>

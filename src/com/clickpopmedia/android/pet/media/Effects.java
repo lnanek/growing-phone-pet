@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Vibrator;
+import android.view.Gravity;
 import android.widget.Toast;
 
 import com.clickpopmedia.android.pet.R;
@@ -45,7 +46,7 @@ public class Effects {
 		}
 		
 		mLastToast = Toast.makeText(mContext, messageID, Toast.LENGTH_SHORT);
-		//toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
+		mLastToast.setGravity(Gravity.CENTER, 0, 0);
 		mLastToast.show();
 	}
 	

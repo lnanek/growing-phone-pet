@@ -1,8 +1,15 @@
 package com.clickpopmedia.android.pet.model;
 
+import static com.clickpopmedia.android.pet.Constants.*;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Random;
 
 import android.graphics.Color;
+import android.os.SystemClock;
+import android.util.Log;
 
 /**
  * Pet that grows characteristics based on interaction.
@@ -10,6 +17,10 @@ import android.graphics.Color;
  */
 public class Pet {
 
+	public enum State {
+		NORMAL, HAPPY, CRYING
+	}
+	
 	public enum Toy {
 		BOOK, INSTRUMENT, WEIGHTS, GAME_CONTROLLER,
 	}
@@ -19,7 +30,7 @@ public class Pet {
 	}
 	
 	public enum Scenery {
-		CAVERN, CITY, FOREST, HILLS, MOUNTAIN
+		CAVERN, CITY, FOREST, HILLS, MOUNTAIN, OCEAN
 	}
 	
 	public static final int[] COLORS = new int[] {
@@ -29,6 +40,10 @@ public class Pet {
 		Color.parseColor("#fff84d0c"),//Orange.
 		Color.parseColor("#fffdf115"),//Yellow.
 	};
+	
+	private static final String LOG_TAG = "GPP Pet";
+	
+	private static final long TOUCH_MEMORY_MS = 500;
 
 	private int mColorIndex;
 	
@@ -55,6 +70,10 @@ public class Pet {
 	private int mFoodCountVegetable;
 	
 	private Scenery mScenery = Scenery.FOREST;
+	
+	private State mState = State.NORMAL;
+	
+	private List<Long> mRecentTouchTimes = new LinkedList<Long>();
 	
 	public Pet() {
 		this(null);
@@ -174,6 +193,55 @@ public class Pet {
 
 	public boolean isGamer() {
 		return mToyCountGameController > 0 && mToyCountGameController > mToyCountWeights;
+	}
+
+	/**
+	 * Pet forgets recent toy/food with a tap,
+	 * is happy with a tap otherwise,
+	 * and gets upset with too frequent tapping.
+	 * 
+	 */
+	public void tap() {
+		//TODO use crying for shaked instead.
+			
+		//Forget taps that aren't recent.
+		final long now = SystemClock.uptimeMillis();
+		final long removeTime = now - TOUCH_MEMORY_MS;
+		for( final ListIterator<Long> i = mRecentTouchTimes.listIterator(); i.hasNext(); ) {
+			final long previousTouchTime = i.next();		
+			if ( previousTouchTime < removeTime ) {
+				i.remove();
+			}
+		}
+
+		//Reset last food/toy if we just did that instead of counting as tap.
+		if ( null != mRecentFood || null != mRecentToy ) {
+			mRecentToy = null;
+			mRecentFood = null;			
+		
+		//Count as a tap.
+		} else {
+			mRecentTouchTimes.add(now);
+		}
+		
+		//Decide response.
+		if ( LOG ) Log.d(LOG_TAG, "Recent touches are: " + mRecentTouchTimes);		
+		switch( mRecentTouchTimes.size() ) {
+			case 0:
+				if ( LOG ) Log.d(LOG_TAG, "Pet state set to normal.");
+				mState = State.NORMAL;
+			case 1:
+				if ( LOG ) Log.d(LOG_TAG, "Pet state set to happy.");
+				mState = State.HAPPY;
+				break;
+			default:
+				if ( LOG ) Log.d(LOG_TAG, "Pet state set to crying.");
+				mState = State.CRYING;
+		}
+	}
+	
+	public State getState() {
+		return mState;
 	}
 
 }

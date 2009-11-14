@@ -326,7 +326,7 @@ public class ShowPet extends TabActivity {
 
 	//TODO More interesting touch behavior.
 	/**
-	 * Tapping the screen opens and closes the tabs.
+	 * Tapping the screen affects the pet.
 	 * Swiping changes the scenery.
 	 */
 	@Override
@@ -338,7 +338,8 @@ public class ShowPet extends TabActivity {
 		
 		//Otherwise handle as a tap.
 		if ( MotionEvent.ACTION_UP == event.getAction() ) {
-			toggleTabsCollapsed();
+			mPet.tap();
+			mPetView.showPet(mPet);
 			return true;	
 		}
 		

@@ -9,24 +9,38 @@
 	    android:layout_height="fill_parent"
 	    android:id="@+id/petView"
 	    >
+	    
+	    <!-- Background scenery behind pet. Stretched to fit the screen. -->
 	    <ImageView
 		    android:layout_width="fill_parent"
 		    android:layout_height="fill_parent"
 		    android:scaleType="fitXY"
-		    android:id="@+id/sceneryView"
+		    android:id="@+id/sceneryBackgroundView"
 	    	/>
+	    	
+	    <!-- The pet's body. Colored using a color filter. -->
 	    <ImageView
 		    android:layout_width="fill_parent"
 		    android:layout_height="fill_parent"
 		    android:scaleType="centerInside"
 		    android:id="@+id/bodyView"
 	    	/>
+	    	
+	    <!-- The pet's features and items. Placed on top of the body. -->	
 	    <ImageView
 		    android:layout_width="fill_parent"
 		    android:layout_height="fill_parent"
 		    android:scaleType="centerInside"
 		    android:id="@+id/featuresView"
 	    	/>
+	    	
+	    <!-- Foreground scenery in front of pet. Stretched to fit the screen. -->	    	
+	    <ImageView
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    android:scaleType="fitXY"
+		    android:id="@+id/sceneryForegroundView"
+	    	/>	
 	</view>
 	
 	<LinearLayout 

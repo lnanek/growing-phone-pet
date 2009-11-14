@@ -29,7 +29,8 @@ public class PetView extends FrameLayout {
 	//Body needs separate view because LayerDrawable seems to ignore color filter on individual layers.
 	private ImageView mBodyView;
 	private ImageView mFeaturesView;
-	private ImageView mSceneryView;
+	private ImageView mSceneryBackgroundView;
+	private ImageView mSceneryForegroundView;
 	
 	public PetView(Context context) {
 		super(context);
@@ -49,7 +50,8 @@ public class PetView extends FrameLayout {
 
 		mBodyView = (ImageView) findViewById(R.id.bodyView);
 		mFeaturesView = (ImageView) findViewById(R.id.featuresView);		
-		mSceneryView = (ImageView) findViewById(R.id.sceneryView);
+		mSceneryBackgroundView = (ImageView) findViewById(R.id.sceneryBackgroundView);
+		mSceneryForegroundView = (ImageView) findViewById(R.id.sceneryForegroundView);
 	}
 
 	private void add(final ArrayList<Drawable> drawables, final int drawableId) {
@@ -57,11 +59,18 @@ public class PetView extends FrameLayout {
 	}
 	
 	private void addAnimation(final ArrayList<Drawable> drawables, final int drawableId) {
-		
-		
 		final Drawable drawable = getResources().getDrawable(drawableId);
 		drawables.add(drawable);
-		
+		startAnimation(drawable);
+	}
+	
+	private void setAnimation(final ImageView view, final int drawableId) {
+		final Drawable drawable = getResources().getDrawable(drawableId);
+		view.setImageDrawable(drawable);
+		startAnimation(drawable);
+	}
+
+	private void startAnimation(final Drawable drawable) {
 		if ( drawable instanceof AnimationDrawable ) {
 			if ( LOG ) Log.d(LOG_TAG, "Starting animation.");
 
@@ -83,7 +92,8 @@ public class PetView extends FrameLayout {
 		mBodyView.setImageDrawable(null);
 		mBodyView.setColorFilter(pet.getColor(), Mode.SRC_ATOP);
 		mFeaturesView.setImageDrawable(null);
-		mSceneryView.setImageDrawable(null);
+		mSceneryBackgroundView.setImageDrawable(null);
+		mSceneryForegroundView.setImageDrawable(null);
 
 		//Set new ones.
 		final ArrayList<Drawable> features = new ArrayList<Drawable>();
@@ -127,7 +137,7 @@ public class PetView extends FrameLayout {
 				}
 				break;
 		}
-		
+
 		if ( 0 != features.size() ) {
 			mFeaturesView.setImageDrawable(new LayerDrawable(features.toArray(new Drawable[] {})));
 		}
@@ -135,30 +145,34 @@ public class PetView extends FrameLayout {
 		if ( showScenery ) {
 			switch( pet.getScenery() ) {
 				case FOREST:
-					mSceneryView.setImageResource(R.drawable.scenery_forest);
+					mSceneryBackgroundView.setImageResource(R.drawable.scenery_forest_bg);
 					break;
 				
 				case CAVERN:
-					mSceneryView.setImageResource(R.drawable.scenery_cavern);
+					mSceneryBackgroundView.setImageResource(R.drawable.scenery_cavern_bg);
 					break;
 				
 				case CITY:
-					mSceneryView.setImageResource(R.drawable.scenery_city);
+					mSceneryBackgroundView.setImageResource(R.drawable.scenery_city_bg);
 					break;
 				
 				case HILLS:
-					mSceneryView.setImageResource(R.drawable.scenery_hills);
+					mSceneryBackgroundView.setImageResource(R.drawable.scenery_hills_bg);
 					break;
 				
 				case MOUNTAIN:
-					mSceneryView.setImageResource(R.drawable.scenery_mountain);
+					mSceneryBackgroundView.setImageResource(R.drawable.scenery_mountain_bg);
+					break;
+				
+				case OCEAN:
+					mSceneryBackgroundView.setImageResource(R.drawable.scenery_ocean_bg);
+					mSceneryForegroundView.setImageResource(R.drawable.scenery_ocean_fg);
 					break;
 				
 				default:
 					Log.e(LOG_TAG, "Unknown scenery: " + pet.getScenery());
 			}
 		}
-		
 	}
 
 	private void updateBabyDrawables(Pet pet, ArrayList<Drawable> features) {
@@ -200,9 +214,20 @@ public class PetView extends FrameLayout {
 			}
 		}
 		
-		mBodyView.setImageResource(R.drawable.character_baby_normal01_body01);
-		addAnimation(features, R.drawable.character_baby_normal_face_animation);
-
+		switch( pet.getState() ) {
+			case NORMAL:
+				mBodyView.setImageResource(R.drawable.character_baby_normal01_body01);
+				addAnimation(features, R.drawable.character_baby_normal_face_animation);
+				return;
+			case HAPPY:
+				mBodyView.setImageResource(R.drawable.character_baby_laugh01_body01);
+				addAnimation(features, R.drawable.character_baby_laugh_face_animation);
+				return;
+			case CRYING:
+				setAnimation(mBodyView, R.drawable.character_baby_cry_body_animation);
+				addAnimation(features, R.drawable.character_baby_cry_face_animation);
+				return;
+		}
 	}
 	
 	/*
