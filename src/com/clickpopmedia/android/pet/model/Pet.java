@@ -163,39 +163,6 @@ public class Pet {
 	}	
 
 	/**
-	 * Get the current size of the Pet.
-	 * 
-	 * @return size 0 or higher
-	 */
-	public int getSize() {
-		return (mFoodCountMeat + mFoodCountSweets + mFoodCountVegetable) / 2;
-	}
-	
-	public Scenery getScenery() {
-		return mScenery;
-	}
-
-	public Toy getRecentToy() {
-		return mRecentToy;
-	}
-
-	public Food getRecentFood() {
-		return mRecentFood;
-	}
-
-	public int getColor() {
-		return COLORS[mColorIndex];
-	}
-
-	public boolean isPlaya() {
-		return mToyCountWeights > 0 && mToyCountWeights >= mToyCountGameController;
-	}
-
-	public boolean isGamer() {
-		return mToyCountGameController > 0 && mToyCountGameController > mToyCountWeights;
-	}
-
-	/**
 	 * Pet forgets recent toy/food with a tap,
 	 * is happy with a tap otherwise,
 	 * and gets upset with too frequent tapping.
@@ -240,8 +207,127 @@ public class Pet {
 		}
 	}
 	
+	/**
+	 * Get the current size of the Pet.
+	 * 
+	 * @return size 0 or higher
+	 */
+	public int getSize() {
+		return (mFoodCountMeat + mFoodCountSweets + mFoodCountVegetable) / 2;
+	}
+	
+	
+	//Getters for members.
+	//TODO look into cleaner persistence method, like DB layer accessing annotated fields.
+
 	public State getState() {
 		return mState;
 	}
+		
+	public Scenery getScenery() {
+		return mScenery;
+	}
 
+	public Toy getRecentToy() {
+		return mRecentToy;
+	}
+
+	public Food getRecentFood() {
+		return mRecentFood;
+	}
+
+	public int getColor() {
+		return COLORS[mColorIndex];
+	}
+
+	public boolean isPlaya() {
+		return mToyCountWeights > 0 && mToyCountWeights >= mToyCountGameController;
+	}
+
+	public boolean isGamer() {
+		return mToyCountGameController > 0 && mToyCountGameController > mToyCountWeights;
+	}
+
+	public int getColorIndex() {
+		return mColorIndex;
+	}
+
+	public int getToyCountBook() {
+		return mToyCountBook;
+	}
+
+	public int getToyCountInstrument() {
+		return mToyCountInstrument;
+	}
+
+	public int getToyCountWeights() {
+		return mToyCountWeights;
+	}
+
+	public int getToyCountGameController() {
+		return mToyCountGameController;
+	}
+
+	public int getFoodCountMeat() {
+		return mFoodCountMeat;
+	}
+
+	public int getFoodCountSweets() {
+		return mFoodCountSweets;
+	}
+
+	public int getFoodCountVegetable() {
+		return mFoodCountVegetable;
+	}
+	
+	//Setters for members.
+
+	public void setColorIndex(int colorIndex) {
+		this.mColorIndex = colorIndex;
+	}
+
+	public void setRecentToy(Toy recentToy) {
+		this.mRecentToy = recentToy;
+	}
+
+	public void setRecentFood(Food recentToy) {
+		this.mRecentFood = recentToy;
+	}
+
+	public void setToyCountBook(int toyCountBook) {
+		this.mToyCountBook = toyCountBook;
+	}
+
+	public void setToyCountInstrument(int toyCountInstrument) {
+		this.mToyCountInstrument = toyCountInstrument;
+	}
+
+	public void setToyCountWeights(int toyCountWeights) {
+		this.mToyCountWeights = toyCountWeights;
+	}
+
+	public void setToyCountGameController(int toyCountGameController) {
+		this.mToyCountGameController = toyCountGameController;
+	}
+
+	public void setFoodCountMeat(int foodCountMeat) {
+		this.mFoodCountMeat = foodCountMeat;
+	}
+
+	public void setFoodCountSweets(int foodCountSweets) {
+		this.mFoodCountSweets = foodCountSweets;
+	}
+
+	public void setFoodCountVegetable(int foodCountVegetable) {
+		this.mFoodCountVegetable = foodCountVegetable;
+	}
+
+	public void setScenery(Scenery scenery) {
+		this.mScenery = scenery;
+	}
+
+	public void setState(State state) {
+		this.mState = state;
+	}
+	
 }

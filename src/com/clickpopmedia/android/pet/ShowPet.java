@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 
+import com.clickpopmedia.android.pet.db.DbAdapter;
 import com.clickpopmedia.android.pet.media.Effects;
 import com.clickpopmedia.android.pet.model.Pet;
 import com.clickpopmedia.android.pet.model.Pet.Food;
@@ -34,7 +35,6 @@ import com.clickpopmedia.android.pet.view.PetView;
  * 
  */
 public class ShowPet extends TabActivity {
-	//TODO Persist pet over multiple runs. Maybe offer a reset option in the settings at the same time.
 
 	private static final String LOG_TAG = "GPP ShowPet";
 	
@@ -70,10 +70,14 @@ public class ShowPet extends TabActivity {
 		}
 	};
 	
+    private DbAdapter mDb;
+    	
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
+        mDb = new DbAdapter(this).open();
+        
 		PreferenceManager.setDefaultValues(this, R.xml.settings, false);		
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		
@@ -83,7 +87,7 @@ public class ShowPet extends TabActivity {
 		if ( null != savedPet && savedPet instanceof Pet ) {
 			mPet = (Pet) savedPet;
 		} else {
-			mPet = new Pet();
+			mPet = mDb.load();
 		}
 		
 		final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -274,6 +278,7 @@ public class ShowPet extends TabActivity {
 		if ( LOG ) Log.d(LOG_TAG, "onResume()");
 		
 		registerReceiver(mNewPetReceiver , new IntentFilter(Settings.NEW_PET_ACTION));
+		
 	}
 	
 	@Override
@@ -283,6 +288,7 @@ public class ShowPet extends TabActivity {
 		if ( LOG ) Log.d(LOG_TAG, "onPause()");
 		
 		unregisterReceiver(mNewPetReceiver);
+		mDb.save(mPet);
 	}	
 	
 	@Override
@@ -307,6 +313,7 @@ public class ShowPet extends TabActivity {
 	protected void onDestroy() {
 		super.onDestroy();
 		mEffects.release();
+		mDb.close();
 	}	
 
 	/**
