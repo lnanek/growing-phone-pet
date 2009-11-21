@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<style name="TabStyle" parent="android:Theme.Black">
+		<!--  
+		<item name="android:background">#888</item>
+		-->		
+		<item name="android:tabWidgetStyle">@style/Widget.TabWidget</item>
+	</style> 
+
+	
+	<style name="Widget.TabWidget" parent="android:Widget.TabWidget">
+        <item name="android:textAppearance">@style/TextAppearance.Widget.TabWidget</item>
+        <item name="android:background">#0000</item>
+    </style>
+ 
+    
+    <style name="TextAppearance.Widget.TabWidget" parent="android:TextAppearance.Widget.TabWidget">
+        <item name="android:textSize">14sp</item>
+        <!--
+        <item name="android:textStyle">normal</item>
+        
+        <item name="android:textStyle">@color/tab_indicator_style</item>
+        -->
+        <item name="android:textColor">@color/tab_indicator_text</item>
+    </style>
+
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- XXX Can't seem to get this working. May not be possible. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true" android:textStyle="normal"/>
+    <item android:textStyle="bold"/> <!-- not selected -->
+</selector>

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LevelListDrawable;
 import android.media.AudioManager;
 import android.os.Bundle;
@@ -20,8 +21,9 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TabHost;
-import android.widget.TabWidget;
+import android.widget.TextView;
 
 import com.clickpopmedia.android.pet.db.DbAdapter;
 import com.clickpopmedia.android.pet.media.Effects;
@@ -59,6 +61,10 @@ public class ShowPet extends TabActivity {
 	private LevelListDrawable mTabOpenCloseIndicator;
 	
     private GestureDetector mGestureDetector;
+    
+	private boolean mTabsCollapsed = true;
+	
+	private TabHost mTabHost;
 
 	private BroadcastReceiver mNewPetReceiver = new BroadcastReceiver() {
 		@Override
@@ -95,36 +101,34 @@ public class ShowPet extends TabActivity {
 		
 		mEffects = new Effects();
 		
-		setContentView(R.layout.main);
+		setContentView(R.layout.show_pet);
 		mPetView = (PetView) findViewById(R.id.petView);
 		mPetView.showPet(mPet);
 		
 		//Setup tabs. Special in that they can collapse down to just the indicators.
 		//TODO Consider implementing own tabs instead of hacking the built in stuff like this.
-		final TabHost tabHost = getTabHost();
-		final ViewGroup tabContentView = tabHost.getTabContentView();
-		LayoutInflater.from(this).inflate(R.layout.tabs, tabContentView, true);
+		mTabHost = getTabHost();
+		final ViewGroup tabWidget = (ViewGroup) findViewById(android.R.id.tabs);
+		final ViewGroup tabContentView = mTabHost.getTabContentView();
+		LayoutInflater.from(this).inflate(R.layout.tab_contents, tabContentView, true);
 		
-		tabHost.addTab(tabHost.newTabSpec(FUN_TAB)
-			.setIndicator(getText(R.string.tab_indicator_fun))
+		mTabHost.addTab(mTabHost.newTabSpec(FUN_TAB)
+			.setIndicator(createTextOnlyIndicator(tabWidget, R.string.tab_indicator_fun))
 			.setContent(R.id.funTabContent));
-		tabHost.addTab(tabHost.newTabSpec(FOOD_TAB)
-			.setIndicator(getText(R.string.tab_indicator_food))
+		mTabHost.addTab(mTabHost.newTabSpec(FOOD_TAB)
+			.setIndicator(createTextOnlyIndicator(tabWidget, R.string.tab_indicator_food))
 			.setContent(R.id.foodTabContent));
-		tabHost.addTab(tabHost.newTabSpec(SETTINGS_TAB)
-			.setIndicator(getText(R.string.tab_indicator_settings))
-			//TODO change style/theme on the settings to match the tabs. Currently black inside white tabs.
+		mTabHost.addTab(mTabHost.newTabSpec(SETTINGS_TAB)
+			.setIndicator(createTextOnlyIndicator(tabWidget, R.string.tab_indicator_settings))
 		    .setContent(new Intent(this, Settings.class)));
-
+		
 		//This last tab has no content and just uses the indicator as a collapse/expand control.
-		//TODO Try to change the appearance of this indicator more so users don't expect content?
 		mTabOpenCloseIndicator = (LevelListDrawable) getResources().getDrawable(R.drawable.open_close_level_list);
-		tabHost.addTab(tabHost.newTabSpec(EXPAND_COLLAPSE_TAB)
-			.setIndicator("", mTabOpenCloseIndicator)
+		mTabHost.addTab(mTabHost.newTabSpec(EXPAND_COLLAPSE_TAB)
+			.setIndicator(createImageOnlyIndicator(tabWidget, mTabOpenCloseIndicator))
 			.setContent(R.id.emptyTabContent));
 		
-		tabHost.setCurrentTabByTag(EXPAND_COLLAPSE_TAB);
-		final TabWidget tabWidget = (TabWidget) findViewById(android.R.id.tabs);
+		mTabHost.setCurrentTabByTag(EXPAND_COLLAPSE_TAB);
 		final View opencloseTabIndicator = tabWidget.getChildAt(3);
 				
 		//Toggle the tabs between expanded and collapsed when the control is clicked.
@@ -145,13 +149,13 @@ public class ShowPet extends TabActivity {
 				
 				if ( LOG ) Log.d(LOG_TAG, "OPENCLOSE TAG focused.");
 
-				if ( View.VISIBLE == tabContentView.getVisibility() ) {
+				if ( !mTabsCollapsed ) {
 					setTabsCollapsed(true);
 				}
 			}
 		});		
 		
-		tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
+		mTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
 			@Override
 			public void onTabChanged(String tabId) {
 				
@@ -168,7 +172,7 @@ public class ShowPet extends TabActivity {
 				mPreviousTabTag = tabId;
 			}			
 		});
-		
+				
 		//Setup buttons.
 		addFoodClickListener(R.id.foodButtonMeat, Food.MEAT);
 		addFoodClickListener(R.id.foodButtonSweets, Food.SWEETS);
@@ -181,18 +185,49 @@ public class ShowPet extends TabActivity {
 	}
 	
 	/**
+	 * Create a tab indicator that has only a centered image.
+	 * 
+	 */
+    public View createImageOnlyIndicator(ViewGroup tabWidget, Drawable drawable) {
+
+        View tabIndicator = LayoutInflater.from(this).inflate(
+        	R.layout.tab_indicator_image,
+            tabWidget,
+            false); // no inflate params
+
+        final ImageView iv = (ImageView) tabIndicator.findViewById(R.id.icon);
+        iv.setImageDrawable(drawable);
+
+        return tabIndicator;
+    }	
+
+    /**
+     * Create a tab indicator that has only centered text.
+     * 
+     */
+    public View createTextOnlyIndicator(ViewGroup tabWidget, int resid) {
+
+        View tabIndicator = LayoutInflater.from(this).inflate(
+        	R.layout.tab_indicator_text,
+            tabWidget,
+            false); // no inflate params
+
+        final TextView tv = (TextView) tabIndicator.findViewById(R.id.title);
+        tv.setText(resid);
+
+        return tabIndicator;
+    }    
+    
+	/**
 	 * Collapse tabs as per {@link #setTabsCollapsed(boolean)}
 	 * if they are currently open.
 	 * Otherwise close them via the same method.
 	 */
 	private void toggleTabsCollapsed() {
-		
-		TabHost tabHost = getTabHost();
-		View tabContent = tabHost.getTabContentView();
-		
-		if ( View.VISIBLE != tabContent.getVisibility() ) {
+				
+		if ( mTabsCollapsed ) {
 			setTabsCollapsed(false);
-			tabHost.setCurrentTabByTag(FUN_TAB);
+			mTabHost.setCurrentTabByTag(FUN_TAB);
 		} else {
 			setTabsCollapsed(true);
 		}
@@ -207,15 +242,12 @@ public class ShowPet extends TabActivity {
 	 */
 	private void setTabsCollapsed(boolean collapsed) {
 		
-		TabHost tabHost = getTabHost();
-		View tabContent = tabHost.getTabContentView();
+		mTabsCollapsed = collapsed;
 				
 		if ( collapsed ) {
-			tabContent.setVisibility(View.GONE);
-			tabHost.setCurrentTabByTag(EXPAND_COLLAPSE_TAB);
+			mTabHost.setCurrentTabByTag(EXPAND_COLLAPSE_TAB);
 			mTabOpenCloseIndicator.selectDrawable(0);
 		} else {
-			tabContent.setVisibility(View.VISIBLE);
 			mTabOpenCloseIndicator.selectDrawable(1);
 		}		
 	}
@@ -331,7 +363,6 @@ public class ShowPet extends TabActivity {
 		return true;	
 	}
 
-	//TODO More interesting touch behavior.
 	/**
 	 * Tapping the screen affects the pet.
 	 * Swiping changes the scenery.
@@ -353,6 +384,8 @@ public class ShowPet extends TabActivity {
 		return super.onTouchEvent(event);
 	}
 
+	//Change scenery on left and right flings.
+	
 	public void onFlingLeft() {
 		mPet.previousScene();
 		mPetView.showPet(mPet);
