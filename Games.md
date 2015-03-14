@@ -1,0 +1,1 @@
+This is a publicly accessible area for posting ideas for the mini games. Anyone with a Google account can comment. There's also a private one in the project management area.
